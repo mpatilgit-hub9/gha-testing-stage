@@ -30,3 +30,4 @@ jobs:
           message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> (<{run_url}|details>)"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+exir
