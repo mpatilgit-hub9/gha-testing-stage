@@ -11,34 +11,33 @@ on:
 
 jobs:
   build:
-    runs-on: [ubuntu-24.04-s390x, ubuntu-24.04-ppc64le]
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [s390x, ppc64le]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Run a one-line script
-        run: echo Hello, world! Github app is running successfully.
+        run: echo "Hello, world! GitHub app is running successfully."
 
-      # ✅ Slack notification on failure
-     # - name: Notify Slack on failure
-      #  if: always()
-     #   uses: ravsamhq/notify-slack-action@v2
-      #  with:
-       #   status: ${{ job.status }}
-       #   notify_when: failure
-        #  notification_title: "{workflow} – {status_message}"
-        #  message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> (<{run_url}|details>)"
-      #  env:
-        #  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      - name: Post a message in a channel
-          uses: slackapi/slack-github-action@v2.1.1
-          with:
-                webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-                  webhook-type: incoming-webhook
-                    payload: |
-      text: "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-      blocks:
-        - type: "section"
-          text:
-            type: "mrkdwn"
-            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+      - name: Post a message in a channel on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          payload: |
+            {
+              "text": "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
