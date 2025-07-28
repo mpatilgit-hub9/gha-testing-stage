@@ -41,7 +41,7 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          ex
+          
 
       - name: Create issue on failure
         if: failure()
