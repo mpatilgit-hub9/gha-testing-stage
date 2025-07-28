@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'
@@ -22,7 +22,7 @@ jobs:
       - name: Run a one-line script
         run: echo "Hello, world! GitHub app is running successfully."
 
-      - name: Post a message in a channel on failure
+      - name: Post a message in Slack on failure
         if: failure()
         uses: slackapi/slack-github-action@v2.1.1
         with:
@@ -41,4 +41,13 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        
+
+      - name: Create issue on failure
+        if: failure()
+        uses: bryannice/gitactions-git-issue-creation@2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ISSUE_TITLE: "Workflow failed: ${{ github.workflow }}"
+          GITHUB_ISSUE_BODY: |
+            Run #${{ github.run_id }} failed.  
+            See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
