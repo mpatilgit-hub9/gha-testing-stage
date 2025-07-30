@@ -26,8 +26,8 @@ jobs:
         run: echo "Hello, world! Workflow is running."
 
       # 🚨 Simulate failure: uncomment to test issue creation on failure
-      - name: Simulate failure
-        run: exit 1
+     # - name: Simulate failure
+      #  run: exit 1
 
       - name: Slack notification on failure or cancellation
         if: failure() || cancelled()
