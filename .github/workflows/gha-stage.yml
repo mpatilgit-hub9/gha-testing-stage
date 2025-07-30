@@ -19,12 +19,15 @@ jobs:
     strategy:
       matrix:
         arch: [s390x, ppc64le]
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Run a one-line script
-        run: echo "Hello, world! GitHub app is running successfully."
+        run: echo "Hello, world! Workflow is running."
+
+      # 🚨 Simulate failure: uncomment to test issue creation on failure
+      - name: Simulate failure
+        run: exit 1
 
       - name: Slack notification on failure or cancellation
         if: failure() || cancelled()
@@ -44,5 +47,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ISSUE_TITLE: "Workflow status: ${{ github.workflow }} — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
-            Run #${{ github.run_id }} ended with status **${{ job.status }}**.  
+            ❗ Run #${{ github.run_id }} ended with status **${{ job.status }}**.  
             View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
