@@ -1,13 +1,9 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-  workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -15,28 +11,18 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        arch: [s390x, ppc64le]
-    timeout-minutes: 60
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Simulate failure
+        run: exit 1
 
-      - name: Run a quick step
-        run: echo "Running build."
-
-      # (Optional) simulate failures:
-      # - name: Fail for testing
-      #   run: exit 1
-
-      - name: Create GitHub issue if failure or cancellation
+      - name: Create issue on failure or cancellation
         if: failure() || cancelled()
         uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ISSUE_TITLE: "Workflow status: ${{ github.workflow }} — ${{ job.status }}"
+          GITHUB_ISSUE_TITLE: "Workflow Status — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
             ❗ Run #${{ github.run_id }} ended with **${{ job.status }}**.
-            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
