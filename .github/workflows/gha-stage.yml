@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Simulate failure for testing
-        run: exit 1
+    #  - name: Simulate failure for testing
+    #    run: exit 1
 
       - name: Create GitHub issue on failure or cancellation
         if: failure() || cancelled()
@@ -29,5 +29,5 @@ jobs:
           GITHUB_COMMIT_SHA: ${{ github.sha }}
           GITHUB_ISSUE_TITLE: "Workflow status: ${{ github.workflow }} — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
-            ❗ Run #${{ github.run_id }} ended with **${{ job.status }}**.
+             Run #${{ github.run_id }} ended with **${{ job.status }}**.
             Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
