@@ -3,7 +3,7 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches: [main]
 
 permissions:
   contents: read
@@ -12,23 +12,25 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      # 🚨 Uncomment this block to test a failure
+      # Uncomment to simulate failure
       # - name: Simulate failure
       #   run: exit 1
 
-      - name: Create GitHub issue on failure or cancellation
+      - name: Create issue on failure or cancellation
         if: failure() || cancelled()
-        uses: bryannice/gitactions-git-issue-creation@2.1.0
+        uses: bryannice/gitactions-git-issue-creation@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_COMMIT_SHA: ${{ github.sha }}
           GITHUB_REPO_OWNER: ${{ github.repository_owner }}
           GITHUB_REPO_NAME: ${{ github.repository }}
-          GITHUB_ISSUE_TITLE: "Workflow: ${{ github.workflow }} #${{ github.run_number }} — ${{ job.status }}"
+          GITHUB_ISSUE_TITLE: "Workflow ${{ github.workflow }} #${{ github.run_number }} — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
-            ⚠️ The build job in workflow **${{ github.workflow }}** (run #${{ github.run_number }}) ended with **${{ job.status }}**.
+            ⚠️ Build job in workflow **${{ github.workflow }}** (run #${{ github.run_number }}) ended with **${{ job.status }}**.
             Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # Optional:
+          # GITHUB_ISSUE_LABELS: failed, automated
+          # GITHUB_ISSUE_ASSIGNEES: your‑username
