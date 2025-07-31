@@ -24,7 +24,7 @@ jobs:
  
       - name: Post a message in Slack on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           payload: |
             {
@@ -45,7 +45,7 @@ jobs:
  
       - name: Create issue on failure
         if: failure()
-        uses: bryannice/gitactions-git-issue-creation@2.0.0
+        uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ISSUE_TITLE: "Workflow failed: ${{ github.workflow }}"
