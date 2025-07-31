@@ -1,13 +1,9 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-  workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -16,21 +12,23 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Simulate failure for testing
-        run: exit 1
+      # 🚨 Uncomment this block to test a failure
+      # - name: Simulate failure
+      #   run: exit 1
 
-      - name: Create issue if failure or cancellation
+      - name: Create GitHub issue on failure or cancellation
         if: failure() || cancelled()
-        uses: JasonEtco/create-an-issue@v2
-        with:
-          update_existing: false
-          title: "Build {{ github.workflow }} run #{{ github.run_id }}: {{ job.status }}"
-          body: |
-            ⚠️ Job ended with status **{{ job.status }}**.
-            Repository: {{ github.repository }}
-            Logs: {{ github.server_url }}/{{ github.repository }}/actions/runs/{{ github.run_id }}
+        uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO_NAME: ${{ github.repository }}
+          GITHUB_ISSUE_TITLE: "Workflow: ${{ github.workflow }} #${{ github.run_number }} — ${{ job.status }}"
+          GITHUB_ISSUE_BODY: |
+            ⚠️ The build job in workflow **${{ github.workflow }}** (run #${{ github.run_number }}) ended with **${{ job.status }}**.
+            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
