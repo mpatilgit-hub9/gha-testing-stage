@@ -1,5 +1,5 @@
 name: CI
- 
+
 on:
   push:
     branches: ["main"]
@@ -8,23 +8,28 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/5 * * * *'
- 
+
 jobs:
   build:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         arch: [s390x, ppc64le]
- 
+
     steps:
       - uses: actions/checkout@v4
- 
+
       - name: Run a one-line script
         run: echo "Hello, world! GitHub app is running successfully."
- 
+
+      # Simulate failure on one architecture for testing
+      - name: Simulate failure on ppc64le
+        if: matrix.arch == 'ppc64le'
+        run: exit 1
+
       - name: Post a message in Slack on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack‑github‑action@v2.1.1
         with:
           payload: |
             {
@@ -42,13 +47,12 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
- 
       - name: Create issue on failure
         if: failure()
-        uses: bryannice/gitactions-git-issue-creation@2.1.0
+        uses: bryannice/gitactions-git-issue-creation@v2.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ISSUE_TITLE: "Workflow failed: ${{ github.workflow }}"
           GITHUB_ISSUE_BODY: |
-            Run #${{ github.run_id }} failed.  
-            See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ⚠️ Build job failed on `${{ matrix.arch }}` for run #${{ github.run_id }}.
+            View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
