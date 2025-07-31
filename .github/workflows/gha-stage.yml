@@ -12,17 +12,22 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Simulate failure
+
+      - name: Simulate failure for testing
         run: exit 1
 
-      - name: Create issue on failure or cancellation
+      - name: Create GitHub issue on failure or cancellation
         if: failure() || cancelled()
         uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ISSUE_TITLE: "Workflow Status — ${{ job.status }}"
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO_NAME: ${{ github.repository }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
+          GITHUB_ISSUE_TITLE: "Workflow status: ${{ github.workflow }} — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
             ❗ Run #${{ github.run_id }} ended with **${{ job.status }}**.
-            View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
