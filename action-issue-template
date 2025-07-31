@@ -1,0 +1,7 @@
+---
+title: "{{ env.GITHUB_WORKFLOW }} GitHub Action failed"
+---
+
+See [workflow logs]
+(https://github.com/{{ env.GITHUB_REPOSITORY }}/actions/runs/{{ env.GITHUB_RUN_ID }})
+for details.
