@@ -1,36 +1,54 @@
 name: CI
-
+ 
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
-
-permissions:
-  contents: read
-  issues: write
-
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+ 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        arch: [s390x, ppc64le]
+ 
     steps:
       - uses: actions/checkout@v4
+ 
+      - name: Run a one-line script
+        run: echo "Hello, world! GitHub app is running successfully."
+ 
+      - name: Post a message in Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          payload: |
+            {
+              "text": "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      # Uncomment to simulate failure
-      # - name: Simulate failure
-      #   run: exit 1
-
-      - name: Create issue on failure or cancellation
-        if: failure() || cancelled()
-        uses: bryannice/gitactions-git-issue-creation@v2.1.0
+ 
+      - name: Create issue on failure
+        if: failure()
+        uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_COMMIT_SHA: ${{ github.sha }}
-          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
-          GITHUB_REPO_NAME: ${{ github.repository }}
-          GITHUB_ISSUE_TITLE: "Workflow ${{ github.workflow }} #${{ github.run_number }} — ${{ job.status }}"
+          GITHUB_ISSUE_TITLE: "Workflow failed: ${{ github.workflow }}"
           GITHUB_ISSUE_BODY: |
-            ⚠️ Build job in workflow **${{ github.workflow }}** (run #${{ github.run_number }}) ended with **${{ job.status }}**.
-            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          # Optional:
-          # GITHUB_ISSUE_LABELS: failed, automated
-          # GITHUB_ISSUE_ASSIGNEES: your‑username
+            Run #${{ github.run_id }} failed.  
+            See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
