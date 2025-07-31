@@ -19,33 +19,24 @@ jobs:
     strategy:
       matrix:
         arch: [s390x, ppc64le]
+    timeout-minutes: 60
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run a one-line script
-        run: echo "Hello, world! Workflow is running."
+      - name: Run a quick step
+        run: echo "Running build."
 
-      # 🚨 Simulate failure: uncomment to test issue creation on failure
-     # - name: Simulate failure
-      #  run: exit 1
+      # (Optional) simulate failures:
+      # - name: Fail for testing
+      #   run: exit 1
 
-      - name: Slack notification on failure or cancellation
-        if: failure() || cancelled()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          payload: |
-            {
-              "text": "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Create GitHub issue when job failed or cancelled
+      - name: Create GitHub issue if failure or cancellation
         if: failure() || cancelled()
         uses: bryannice/gitactions-git-issue-creation@2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ISSUE_TITLE: "Workflow status: ${{ github.workflow }} — ${{ job.status }}"
           GITHUB_ISSUE_BODY: |
-            ❗ Run #${{ github.run_id }} ended with status **${{ job.status }}**.  
-            View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ❗ Run #${{ github.run_id }} ended with **${{ job.status }}**.
+            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
