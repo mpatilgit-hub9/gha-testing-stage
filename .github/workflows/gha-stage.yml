@@ -11,7 +11,7 @@ on:
  
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: [ubuntu-24.04-s390x, ubuntu-24.04-ppc64le]
     strategy:
       matrix:
         arch: [s390x, ppc64le]
@@ -22,33 +22,4 @@ jobs:
       - name: Run a one-line script
         run: echo "Hello, world! GitHub app is running successfully."
  
-      - name: Post a message in Slack on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          payload: |
-            {
-              "text": "*GitHub Action build result*: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
- 
-      - name: Create issue on failure
-        if: failure()
-        uses: bryannice/gitactions-git-issue-creation@2.1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ISSUE_TITLE: "Workflow failed: ${{ github.workflow }}"
-          GITHUB_ISSUE_BODY: |
-            Run #${{ github.run_id }} failed.  
-            See logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      
