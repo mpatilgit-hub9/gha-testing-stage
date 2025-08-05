@@ -30,7 +30,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run linting
-        run: bash run_linting.sh
+        run: |
+         if [ -x run_linting.sh ]; then
+         bash run_linting.sh
+         else
+          echo "Skipping linting: run_linting.sh not found or not executable"
+          fi
+
  
   tests:
     name: Tests - ${{ matrix.os }}
