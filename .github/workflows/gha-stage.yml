@@ -12,6 +12,20 @@ on:
     - cron: '*/5 * * * *'
 
 jobs:
+
+  build:
+    runs-on: [ubuntu-24.04]
+    strategy:
+      matrix:
+        arch: [s390x, ppc64le]
+ 
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - name: Run a one-line script
+        run: echo "Hello, world! GitHub app is running successfully."
+
+        
   code-quality:
     name: Code quality
     runs-on: ubuntu-24.04
