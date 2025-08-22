@@ -58,7 +58,7 @@ jobs:
     name: Notify failed build
     needs:
       - code-quality
-     # - tests
+      - build
     if: failure() && github.event.pull_request == null
     runs-on: ubuntu-latest
     steps:
